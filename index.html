@@ -1,0 +1,177 @@
+data:text/html,
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Luc’s Shuttles</title>
+  <style>
+    body {
+      font-family: -apple-system;
+      text-align: center;
+      padding: 20px;
+    }
+    button {
+      font-size: 1.2em;
+      margin: 5px;
+      padding: 10px 20px;
+    }
+    #timer, #count {
+      font-size: 30vw;
+      margin: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LucShuttles</h1>
+  <div id="timer">Ready</div>
+  <div id="count">0</div>
+  <button id="start">Start</button>
+  <button id="stop">Stop</button>
+  <button id="reset">Reset</button>
+
+  <script>
+    const timerEl = document.getElementById('timer');
+    const countEl = document.getElementById('count');
+    const synth = window.speechSynthesis;
+    let isRunning = false;
+    let isRest = false;
+    let time = 0;
+    let shuttle = 0;
+    let timerId;
+
+    function speak(text) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = synth.getVoices().find(v => v.name.includes('Samantha')) || synth.getVoices()[0];
+      synth.speak(u);
+    }
+
+    function step() {
+      time++;
+
+      if (!isRest) {
+        timerEl.textContent = ${time};
+
+        // Use playSound for known audio clips
+        if ([5, 10, 15, 20, 25, 27, 28, 29, 30].includes(time)) {
+          playSound(time.toString());
+        }
+
+        if (time === 30) {
+          shuttle++;
+          countEl.textContent = ${shuttle};
+          clearInterval(timerId);
+          isRest = true;
+          time = 0;
+          timerId = setInterval(step, 1000);
+        }
+      } else {
+        timerEl.textContent = Rest: ${time}s;
+
+        // Countdown during rest (audio files for 31 and 32 might not exist — keep speak fallback if needed)
+        if (time === 1) playSound('31');
+        if (time === 2) playSound('32');
+
+        if (time === 25) playSound('5');
+        if (time === 27) playSound('3');
+        if (time === 28) playSound('2');
+        if (time === 29) playSound('1');
+
+        if (time === 30) {
+          playSound('go');
+          clearInterval(timerId);
+          isRest = false;
+          time = 0;
+          timerId = setInterval(step, 1000);
+        }
+      }
+    }
+
+    document.getElementById('start').onclick = () => {
+      if (isRunning) return;
+      isRunning = true;
+      time = 0;
+
+      playSound('3');
+
+      setTimeout(() => {
+        playSound('2');
+        setTimeout(() => {
+          playSound('1');
+          setTimeout(() => {
+            playSound('go');
+            timerId = setInterval(step, 1000);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    };
+
+    document.getElementById('stop').onclick = () => {
+      clearInterval(timerId);
+      isRunning = false;
+    };
+
+    document.getElementById('reset').onclick = () => {
+      clearInterval(timerId);
+      isRunning = false;
+      isRest = false;
+      time = 0;
+      shuttle = 0;
+      timerEl.textContent = 'Ready';
+      countEl.textContent = 'Shuttles: 0';
+    };
+
+    // Load voices
+    speechSynthesis.onvoiceschanged = () => {};
+
+    const sounds = {
+      '1': new Audio('https://dl.dropboxusercontent.com/scl/fi/yl26viconpmdpkqwhxfrw/1.mp3?rlkey=69foy0bnj7aza01hwbyhdjib6&st=pf44v7gq'),
+      '2': new Audio('https://dl.dropboxusercontent.com/scl/fi/3192lnrlx2bisrek0yhsc/2.mp3?rlkey=4dhsbdcboou6ojp0iwf5q7dew&st=fffla044'),
+      '3': new Audio('https://dl.dropboxusercontent.com/scl/fi/d0yz9od04ik8hmhco5yax/3.mp3?rlkey=udzrixgfc7q5x3orfi64ixdj8&st=12ww6gfb'),
+      '4': new Audio('https://dl.dropboxusercontent.com/scl/fi/3m8c6e7co0u8a85944q20/4.mp3?rlkey=7quynqs0891ie2weifz55zxqs&st=su6tjpf2'),
+      '5': new Audio('https://dl.dropboxusercontent.com/scl/fi/srajph0q6osanwiaytv25/5.mp3?rlkey=b3sxofbz1prcz25t1wl7t8h2x&st=axg8u80a'),
+      '10': new Audio('https://dl.dropboxusercontent.com/scl/fi/wg8it11flwte6lssopvf5/10.mp3?rlkey=vq5s09ckzit5l0a9xkhavascs&st=56edhx9i'),
+      '15': new Audio('https://dl.dropboxusercontent.com/scl/fi/w1chre0lcend60s7p9467/15.mp3?rlkey=av8rdgy86pncsbs4uu87mk2jk&st=3lburi21'),
+      '20': new Audio('https://dl.dropboxusercontent.com/scl/fi/48j51hktyzyuu6w0umf46/20.mp3?rlkey=q7c93ejgfga6d0gnfb79ebiyq&st=kfm94jfe'),
+      '25': new Audio('https://dl.dropboxusercontent.com/scl/fi/9sqkh9u24acfkyzwaxquc/25.mp3?rlkey=vli2z6esjkjeeux5x12985tiq&st=qltnhdwi'),
+      '26': new Audio('https://dl.dropboxusercontent.com/scl/fi/eh3kkc4nc9q5h834ztcji/26.mp3?rlkey=yueet0suzq54r4jqtupn04v9f&st=nnmewa3o'),
+      '27': new Audio('https://dl.dropboxusercontent.com/scl/fi/lqbq1b8yysyatnad1ysnh/27.mp3?rlkey=rcycnaleazi2bej51x7ry6y5e&st=0i4xce5l'),
+      '28': new Audio('https://dl.dropboxusercontent.com/scl/fi/wqcvvn4nuynih4pn2b4u6/28.mp3?rlkey=zjdcmvo5u476r2q28ar0mkqiq&st=9wnrzg5z'),
+      '29': new Audio('https://dl.dropboxusercontent.com/scl/fi/e32lpbh2pz5f8dz0gzrbr/29.mp3?rlkey=839z3y0593s17kj1oohwbanxq&st=kh61e6rj'),
+      '30': new Audio('https://dl.dropboxusercontent.com/scl/fi/dslkwiagf1puf4c8fk6dx/30.mp3?rlkey=39bqtobvn41ip36s0ero0vq6e&st=7p1fmkaq'),
+      '31': new Audio('https://dl.dropboxusercontent.com/scl/fi/rzej5efa07c18kktw57t1/31.mp3?rlkey=ixiiidt2d8k35biky4vjbe6fe&st=nf1q9fir'),
+      '32': new Audio('https://dl.dropboxusercontent.com/scl/fi/uesdi4j66wmg703k0z668/32.mp3?rlkey=8q4y9h6f0a7um1nlckuglesan&st=4yfzezrg'),
+      '33': new Audio('https://dl.dropboxusercontent.com/scl/fi/a2f692yxb3pi1fs2g0fmm/33.mp3?rlkey=x3502jqm83cylslgm7qnvhmlj&st=ggw9e3uh'),
+      'go': new Audio('https://dl.dropboxusercontent.com/scl/fi/odfct5yz0wt1w9ptohqib/Go.mp3?rlkey=z9oy49bn9mwrtcz5xrugd9mtl&st=7x8zrs0b')
+    };
+
+    window.onload = () => {
+      Object.values(sounds).forEach(audio => {
+        audio.load();
+      });
+
+      // Define unlock function to allow Safari/iOS audio playback
+      function unlockAudio() {
+        Object.values(sounds).forEach(sound => {
+          sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+          }).catch(() => {
+            // Ignored: Safari may block autoplay here but will allow later
+          });
+        });
+      }
+
+      // Attach unlock to user interaction (start button)
+      document.getElementById('start').addEventListener('click', unlockAudio, { once: true });
+    };
+
+    function playSound(key) {
+      const sound = sounds[key];
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
+  </script>
+</body>
+</html>
