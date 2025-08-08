@@ -48,25 +48,23 @@
       time++;
 
       if (!isRest) {
-        timerEl.textContent = ${time};
+        timerEl.textContent = `${time}`;
 
-        // Use playSound for known audio clips
         if ([5, 10, 15, 20, 25, 27, 28, 29, 30].includes(time)) {
           playSound(time.toString());
         }
 
         if (time === 30) {
           shuttle++;
-          countEl.textContent = ${shuttle};
+          countEl.textContent = `${shuttle}`;
           clearInterval(timerId);
           isRest = true;
           time = 0;
           timerId = setInterval(step, 1000);
         }
       } else {
-        timerEl.textContent = Rest: ${time}s;
+        timerEl.textContent = `Rest: ${time}s`;
 
-        // Countdown during rest (audio files for 31 and 32 might not exist — keep speak fallback if needed)
         if (time === 1) playSound('31');
         if (time === 2) playSound('32');
 
@@ -116,10 +114,9 @@
       time = 0;
       shuttle = 0;
       timerEl.textContent = 'Ready';
-      countEl.textContent = 'Shuttles: 0';
+      countEl.textContent = '0';
     };
 
-    // Load voices
     speechSynthesis.onvoiceschanged = () => {};
 
     const sounds = {
@@ -148,19 +145,15 @@
         audio.load();
       });
 
-      // Define unlock function to allow Safari/iOS audio playback
       function unlockAudio() {
         Object.values(sounds).forEach(sound => {
           sound.play().then(() => {
             sound.pause();
             sound.currentTime = 0;
-          }).catch(() => {
-            // Ignored: Safari may block autoplay here but will allow later
-          });
+          }).catch(() => {});
         });
       }
 
-      // Attach unlock to user interaction (start button)
       document.getElementById('start').addEventListener('click', unlockAudio, { once: true });
     };
 
@@ -173,5 +166,4 @@
     }
   </script>
 </body>
-
 </html>
